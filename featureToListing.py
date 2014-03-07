@@ -65,14 +65,16 @@ def feature_to_listing(HOSTN, UNAME, PWORD, TOKN, BASED, SOURC, TITLE, LICN):
 
         # Call Weoapp on the Upload Weofile that was created
         # Store the token that Weoapp creates for the upload
-#        call_weoapp = subprocess.Popen(['weoapp', '--continue', '--GUI', '--no-delete', BASED + geoid + '/' + geoid + '-upload.weo'], -1, None, stdout=subprocess.PIPE)
-#        weo_out, weo_err = call_weoapp.communicate()
-#        for aline in weo_out.split('\n'):
-#            if ':weoapp-token' in aline:
-#                output_tokens_file.write(aline.split(':')[2] + '\n')
+        call_weoapp = subprocess.Popen(['weoapp', '--continue', '--GUI', '--no-delete', 
+                                        BASED + geoid + '/' + geoid + '-upload.weo'], -1, 
+                                        None, stdout=subprocess.PIPE)
+        weo_out, weo_err = call_weoapp.communicate()
+        for aline in weo_out.split('\n'):
+            if ':weoapp-token' in aline:
+                output_tokens_file.write(aline.split(':')[2] + '\n')
 
-        print '-----------------------------------------------------------------------------------------------------------'
-        exit()
+        print '--------------------------------------------------------------------------'
+#        exit()
         feature = input_layer.GetNextFeature()
     else:
         feature = input_layer.GetNextFeature()
