@@ -6,9 +6,6 @@ This command line tool takes WG account information and a vector file to and aut
 Dependencies
 ------------
 GDAL/OGR  
-
 WeoAPP  
-
 WeGeo-Preview Image Creator (**request**)  
-
 Supplemental Functions File (**request**)  
