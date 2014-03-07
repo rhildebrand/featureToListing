@@ -84,14 +84,22 @@ def feature_to_listing(HOSTN, UNAME, PWORD, TOKN, BASED, SOURC, TITLE, LICN):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Create WeoGeo Listings from features in input vector file')
-    parser.add_argument('-H', '--HOSTNAME', required=True, help='Enter Library URL.')
-    parser.add_argument('-U', '--USERNAME', required=True, help='Enter Library Administrator.')
-    parser.add_argument('-P', '--PASSWORD', required=True, help='Enter Administrator Password.')
-    parser.add_argument('-T', '--TOKEN', required=True, help='Enter Tile Token.')
-    parser.add_argument('-B', '--BASEDIR', required=True, help='Enter Abs. path to base directory. EX: C:\\Users\\Project\\Sublistings\\')
-    parser.add_argument('-V', '--VECTOR', required=True, help='Enter path to input file. EX: vectors\\file.shp')
-    parser.add_argument('-N', '--NAME', required=False, default='', help='Enter the desired Base Name for the listing.')
-    parser.add_argument('-L', '--LICENSE', required=False, default=1, type=int, help='Enter the integer value of the License ID you want to use.')
+    parser.add_argument('-H', '--HOSTNAME', required=True, 
+                        help='Enter Library URL.')
+    parser.add_argument('-U', '--USERNAME', required=True, 
+                        help='Enter Library Administrator.')
+    parser.add_argument('-P', '--PASSWORD', required=True, 
+                        help='Enter Administrator Password.')
+    parser.add_argument('-T', '--TOKEN', required=True, 
+                        help='Enter Tile Token.')
+    parser.add_argument('-B', '--BASEDIR', required=True, 
+                        help='Enter Abs. path to base directory. EX: C:\\Users\\Project\\Sublistings\\')
+    parser.add_argument('-V', '--VECTOR', required=True, 
+                        help='Enter path to input file. EX: vectors\\file.shp')
+    parser.add_argument('-N', '--NAME', required=False, default='', 
+                        help='Enter the desired Base Name for the listing.')
+    parser.add_argument('-L', '--LICENSE', required=False, default=1, type=int, 
+                        help='Enter the integer value of the License ID you want to use.')
     args = parser.parse_args()
 
     output_tokens_file = open((args.BASEDIR + 'tokens.csv'), 'w')
