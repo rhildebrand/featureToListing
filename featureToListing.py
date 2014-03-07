@@ -5,7 +5,7 @@ import argparse
 import subprocess
 from HILDEBRAND import *
 
-def feature_to_listing(HOSTN, UNAME, PWORD, TOKN, BASED, SOURC, LSNAM, LICN):
+def feature_to_listing(HOSTN, UNAME, PWORD, TOKN, BASED, SOURC, TITLE, LICN):
     # Set the input vector file. In this case, the
     # input is EPSG:4326 and if a different projection
     # is to be used, some changes will need to be made. 
@@ -25,7 +25,6 @@ def feature_to_listing(HOSTN, UNAME, PWORD, TOKN, BASED, SOURC, LSNAM, LICN):
     # Initializes getting the first feature
     feature = input_layer.GetNextFeature()
     while feature:
-#        if feature.GetField('GEOID') not in ['14460','19740','41860']:
         # Get NSEW of a feature
         north,south,east,west = get_geom(feature)
 
@@ -56,21 +55,21 @@ def feature_to_listing(HOSTN, UNAME, PWORD, TOKN, BASED, SOURC, LSNAM, LICN):
         output_weofile,base_feat,geo_feat = mk_weofile(BASED, geoid)
 
         # Create the structure for an Upload Weofile 
-        weo_contents = mk_upload_weo(HOSTN, LICN, geoid, BASED, baseimage, thumbnail, LSNAM, listing_name, namelsad, base_feat, geo_feat, smerc_n, smerc_s, smerc_e, smerc_w)
+        weo_contents = mk_upload_weo(HOSTN, LICN, geoid, BASED, baseimage, thumbnail, TITLE, listing_name, namelsad, base_feat, geo_feat, smerc_n, smerc_s, smerc_e, smerc_w)
 
         output_weofile.write(weo_contents)
         output_weofile.close()
 
         # Call Weoapp on the Upload Weofile that was created
         # Store the token that Weoapp creates for the upload
-#        call_weoapp = subprocess.Popen(['weoapp', '--continue', '--GUI', '--no-delete', BASED + geoid + '/' + geoid + '-upload.weo'], -1, None, stdout=subprocess.PIPE)
-#        weo_out, weo_err = call_weoapp.communicate()
-#        for aline in weo_out.split('\n'):
-#            if ':weoapp-token' in aline:
-#                output_tokens_file.write(aline.split(':')[2] + '\n')
+        call_weoapp = subprocess.Popen(['weoapp', '--continue', '--GUI', '--no-delete', BASED + geoid + '/' + geoid + '-upload.weo'], -1, None, stdout=subprocess.PIPE)
+        weo_out, weo_err = call_weoapp.communicate()
+        for aline in weo_out.split('\n'):
+            if ':weoapp-token' in aline:
+                output_tokens_file.write(aline.split(':')[2] + '\n')
 
         print '-----------------------------------------------------------------------------------------------------------'
-        exit()
+#        exit()
         feature = input_layer.GetNextFeature()
     else:
         feature = input_layer.GetNextFeature()
