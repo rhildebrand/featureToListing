@@ -103,4 +103,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     output_tokens_file = open((args.BASEDIR + 'tokens.csv'), 'w')
-    feature_to_listing(args.HOSTNAME, args.USERNAME, args.PASSWORD, args.TOKEN, args.BASEDIR, args.VECTOR, args.NAME, args.LICENSE)
+
+    feature_to_listing(args.HOSTNAME, args.USERNAME, args.PASSWORD, args.TOKEN, 
+                       args.BASEDIR, args.VECTOR, args.NAME, args.LICENSE)
