@@ -26,12 +26,12 @@ def feature_to_listing(HOSTN, UNAME, PWORD, TOKN, BASED, SOURC, TITLE, LICN):
     feature = input_layer.GetNextFeature()
     while feature:
         # Get NSEW of a feature
-        north,south,east,west = get_geom(feature)
+        north, south, east, west = get_geom(feature)
 
         # Get NSEW of a feature in SPHERICAL MERCATOR
         # This bbox will be used for boundaries.tiles 
         # when the input tile source is a SMERC token. 
-        smerc_n,smerc_s,smerc_e,smerc_w = reproject_geom(feature)
+        smerc_n, smerc_s, smerc_e, smerc_w = reproject_geom(feature, 4326, 3857)
 
         # Get attribute values to be used later
         # THIS IS A VARIABLE AREA - SPECIFY YOUR ATTRIBUTES FOR NAMING
@@ -42,34 +42,37 @@ def feature_to_listing(HOSTN, UNAME, PWORD, TOKN, BASED, SOURC, TITLE, LICN):
 
         # Make a directory to store the preview image files
         # that are created by TLDR & the Upload Weofile.
-        mk_geoid_dir(BASED + geoid)
+        mk_listing_dir(BASED + geoid)
 
         # Call TLDR to make the preview image files.
-        mk_tldr_call(north,south,east,west,geoid,HOSTN,UNAME,PWORD,TOKN,BASED)
+        mk_tldr_call(north, south, east, west, geoid, 
+                     HOSTN, UNAME, PWORD, TOKN, BASED)
 
         # Get file names for the Upload Weofile.
-        baseimage,thumbnail,kml = get_file_names(BASED + geoid)
+        baseimage, thumbnail, kml = get_file_names(BASED + geoid)
 
         # Open tldr.py-generated boundaries file and 
         # create location for new Weofile output.
-        output_weofile,base_feat,geo_feat = mk_weofile(BASED, geoid)
+        output_weofile, base_feat, geo_feat = mk_weofile(BASED, geoid)
 
         # Create the structure for an Upload Weofile 
-        weo_contents = mk_upload_weo(HOSTN, LICN, geoid, BASED, baseimage, thumbnail, TITLE, listing_name, namelsad, base_feat, geo_feat, smerc_n, smerc_s, smerc_e, smerc_w)
+        weo_contents = mk_upload_weo(HOSTN, LICN, geoid, BASED, baseimage, thumbnail,
+                                     TITLE, listing_name, namelsad, base_feat, 
+                                     geo_feat, smerc_n, smerc_s, smerc_e, smerc_w)
 
         output_weofile.write(weo_contents)
         output_weofile.close()
 
         # Call Weoapp on the Upload Weofile that was created
         # Store the token that Weoapp creates for the upload
-        call_weoapp = subprocess.Popen(['weoapp', '--continue', '--GUI', '--no-delete', BASED + geoid + '/' + geoid + '-upload.weo'], -1, None, stdout=subprocess.PIPE)
-        weo_out, weo_err = call_weoapp.communicate()
-        for aline in weo_out.split('\n'):
-            if ':weoapp-token' in aline:
-                output_tokens_file.write(aline.split(':')[2] + '\n')
+#        call_weoapp = subprocess.Popen(['weoapp', '--continue', '--GUI', '--no-delete', BASED + geoid + '/' + geoid + '-upload.weo'], -1, None, stdout=subprocess.PIPE)
+#        weo_out, weo_err = call_weoapp.communicate()
+#        for aline in weo_out.split('\n'):
+#            if ':weoapp-token' in aline:
+#                output_tokens_file.write(aline.split(':')[2] + '\n')
 
         print '-----------------------------------------------------------------------------------------------------------'
-#        exit()
+        exit()
         feature = input_layer.GetNextFeature()
     else:
         feature = input_layer.GetNextFeature()
@@ -78,7 +81,7 @@ def feature_to_listing(HOSTN, UNAME, PWORD, TOKN, BASED, SOURC, TITLE, LICN):
     return
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Connect to WeoGeoAPI.')
+    parser = argparse.ArgumentParser(description='Create WeoGeo Listings from features in input vector file')
     parser.add_argument('-H', '--HOSTNAME', required=True, help='Enter Library URL.')
     parser.add_argument('-U', '--USERNAME', required=True, help='Enter Library Administrator.')
     parser.add_argument('-P', '--PASSWORD', required=True, help='Enter Administrator Password.')
