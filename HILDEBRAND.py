@@ -103,19 +103,18 @@ def assemble_coords(coords):
 ###############################################################################################################
 
 # Find optimum start scale for spherical mercator tiles
-def startScaleSM (tilesNorth, tilesSouth, tilesEast, tilesWest):
-    longSide = max(tilesNorth - tilesSouth , tilesEast - tilesWest)
-    longSidePixels = longSide / 256
-    C = 156543 / longSidePixels  # max resolution / longSidePixels
-    D = math.trunc(math.log10( C ) / 0.30103)
-    return D
-    
-# Find optimum start scale for geo tiles
-def startScaleGeo (tilesNorth, tilesSouth, tilesEast, tilesWest):
-    longSide = max(tilesNorth - tilesSouth , tilesEast - tilesWest)
-    longSidePixels = longSide / 256
-    C = 0.703125 / longSidePixels
-    D = math.trunc(math.log10( C ) / 0.30103)
+def startScale (cs, tilesNorth, tilesSouth, tilesEast, tilesWest):
+    if cs == 'smerc':
+        longSide = max(tilesNorth - tilesSouth , tilesEast - tilesWest)
+        longSidePixels = longSide / 256
+        C = 156543 / longSidePixels  # max resolution / longSidePixels
+        D = math.trunc(math.log10( C ) / 0.30103)
+
+    else:
+        longSide = max(tilesNorth - tilesSouth , tilesEast - tilesWest)
+        longSidePixels = longSide / 256
+        C = 0.703125 / longSidePixels
+        D = math.trunc(math.log10( C ) / 0.30103)
     return D
 
 ###############################################################################################################
@@ -123,15 +122,19 @@ def startScaleGeo (tilesNorth, tilesSouth, tilesEast, tilesWest):
 ###############################################################################################################
 
 # Modify 'base' in preview_layers.
-def update_preview_base(weos, token, layer_id, update_token, record):
-    '''Begin by creating the indice to slice out the layer_id from the api_url. Then 
-       parse through preview_layers to find the base entity and apply the parameters.'''
-
-    start,stop = layer_id.split(':')
+def update_preview_base(weos, token, update_token, max_zoom, record):
+    '''Parse through preview_layers to find the base entity and apply the parameters.'''
+    start_zoom = startScale(record['boundaries']['tiles']['projection_datum'], 
+                            record['boundaries']['tiles']['north'], 
+                            record['boundaries']['tiles']['south'], 
+                            record['boundaries']['tiles']['east'], 
+                            record['boundaries']['tiles']['west'])
+    num_zooms = max_zoom - start_zoom + 1
+    
     preview_layer_info = record['preview_layers']
     for layer in preview_layer_info:
         if layer['layer_name'] == 'base':
-            status, message = weos.updateTileLayer(token, layer['api_url'][slice(int(start), int(stop))], update_token, layer['image_format'], layer['start_zoom'], layer['num_zooms'])
+            status, message = weos.updateTileLayer(token, layer['api_url'][-12:-5], update_token, layer['image_format'], start_zoom, num_zooms)
             if status != 200:
                 print 'FAILED for: ' + token, message
             else:
@@ -140,14 +143,11 @@ def update_preview_base(weos, token, layer_id, update_token, record):
 
 # Modify preview_layers by adding new feature.
 def add_preview_vector(weos, token, layer_type, url, record):
-    tags_content = record['tag_list']
-    for tag in tags_content:
-        status, message = weos.addVectorLayer(token, layer_type, url)
-###        status, message = weos.addVectorLayer(token, 'highlight', ('http://vectors.weogeo.net.s3.amazonaws.com/vectors/digitalglobe/europe/' + tag + '.json'))
-        if status != 200:
-            print 'FAILED for: ' + token, message
-        else:
-            print 'SUCCESS for: ' + token
+    status, message = weos.addVectorLayer(token, layer_type, url)
+    if status != 200:
+        print 'FAILED for: ' + token, message
+    else:
+        print 'SUCCESS for: ' + token
     return
 
 # Add the OSM Transparent Roads tile overlay
@@ -284,7 +284,7 @@ def mk_json_feature(north, south, east, west, file):
     feature['properties'] = properties
 
     return feature
-### NEEDS WORK ###
+    
 def mk_json_feature_misc(north, south, east, west, file):
     north = float(north)
     south = float(south)
