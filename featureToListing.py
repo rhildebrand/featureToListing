@@ -71,7 +71,7 @@ def feature_to_listing(HOSTN, UNAME, PWORD, TOKN, BASED, SOURC, TITLE, LICN):
         weo_out, weo_err = call_weoapp.communicate()
         for aline in weo_out.split('\n'):
             if ':weoapp-token' in aline:
-                output_tokens_file.write(aline.split(':')[2] + '\n')
+                output_tokens_file.write(aline.split(':')[2] + ',' + geoid + '\n')
 
         print '--------------------------------------------------------------------------'
 #        exit()

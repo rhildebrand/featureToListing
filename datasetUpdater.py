@@ -15,7 +15,7 @@ def dataset_updater(HOSTN, UNAME, PWORD, F, **kwargs):
         print 'Could not connect.'
         exit(0)
     
-    for geoid,token in content:
+    for token,geoid in content:
         geoid = geoid.strip()
         token = token.strip()
         status, record = session.getDataset(token, WeoGeoAPI.formats.JSON)
@@ -25,22 +25,20 @@ def dataset_updater(HOSTN, UNAME, PWORD, F, **kwargs):
         if kwargs['BASE'] is not None:
             HILDEBRAND.update_preview_base(session, token, kwargs['TILE_TOKEN'], kwargs['BASE'], record)
         if kwargs['VECTOR'] is not None:
-            HILDEBRAND.add_preview_vector(session, token, 'highlight', kwargs['VECTOR'] + ''.join(record['tag_list']) + '.json', record)
+            HILDEBRAND.add_preview_vector(session, token, 'highlight', kwargs['VECTOR'] + geoid + '.json', record)
         if kwargs['OVERLAY'] is not None:
             add_preview_tile_layer(session, token, OVERLAY, 'png')
-#        if kwargs['NAME'] is not None:
-#            record['name'] = kwargs['NAME'] + record['name'].split('-')[1]
-#        if LAYERS is not None:
-#            record['layers'] = ['Major & Arterial Roads','All Roads','Railroads']
+        if kwargs['NAME'] is not None:
+            record['name'] = kwargs['NAME'] + record['name']
+        if kwargs['LAYERS'] is not None:
+            record['layers'] = kwargs['LAYERS']
     
-#        status, message = session.updateDataset(token, record, WeoGeoAPI.formats.JSON)
-#        if status != 204:
-#            print 'Update FAILED: ' + token
-#            continue
-#        else: 
-#            print 'Update SUCCESSFUL: ' + token 
+        status, message = session.updateDataset(token, record, WeoGeoAPI.formats.JSON)
+        if status != 204:
+            print 'Update FAILED: ' + token
+            continue
     
-        print 'Tiles and Vector UPDATES are complete for: ' + token
+        print 'UPDATES are complete for: ' + token
     
     input.close()
     return
@@ -59,7 +57,7 @@ if __name__ == '__main__':
                         help='Enter Tile Token.')
     parser.add_argument('-N', '--NAME', required=False, default='', 
                         help='Enter the desired Base Name for the listing.')
-    parser.add_argument('-L', '--LAYERS', required=False, 
+    parser.add_argument('-L', '--LAYERS', nargs='+', required=False, 
                         help='Enter a comma delimited list of layer names.')
     parser.add_argument('-B', '--BASE', required=False, type=int,
                         help='Enter the maximum zoom level of the base tiles token. Used with \'-T\'')
