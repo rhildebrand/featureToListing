@@ -5,20 +5,20 @@ import argparse
 import subprocess
 from HILDEBRAND import *
 
-def feature_to_listing(HOSTN, UNAME, PWORD, TOKN, BASED, SOURC, TITLE, LICN):
+def feature_to_listing():
     # Set the input vector file. In this case, the
     # input is EPSG:4326 and if a different projection
     # is to be used, some changes will need to be made. 
     driver = ogr.GetDriverByName('ESRI Shapefile')
-    input_features_datasource = driver.Open(BASED + SOURC)
+    input_features_datasource = driver.Open(OPTIONS.BASEDIR + OPTIONS.VECTOR)
     if input_features_datasource is None:
-        print 'Could not open ' + SOURC
+        print 'Could not open ' + OPTIONS.VECTOR
         exit
     input_layer = input_features_datasource.GetLayer()
 
     # Make working directory for the TLDR program if it doesn't exist. 
     try:
-        subprocess.check_call(['mkdir', (BASED + 'temp')], shell=True)
+        subprocess.check_call(['mkdir', (OPTIONS.BASEDIR + 'temp')], shell=True)
     except subprocess.CalledProcessError:
         pass
 
@@ -42,22 +42,22 @@ def feature_to_listing(HOSTN, UNAME, PWORD, TOKN, BASED, SOURC, TITLE, LICN):
 
         # Make a directory to store the preview image files
         # that are created by TLDR & the Upload Weofile.
-        mk_listing_dir(BASED + geoid)
+        mk_listing_dir(OPTIONS.BASEDIR + geoid)
 
         # Call TLDR to make the preview image files.
         mk_tldr_call(north, south, east, west, geoid, 
-                     HOSTN, UNAME, PWORD, TOKN, BASED)
+                     OPTIONS.HOSTNAME, OPTIONS.USERNAME, OPTIONS.PASSWORD, OPTIONS.TOKEN, OPTIONS.BASEDIR)
 
         # Get file names for the Upload Weofile.
-        baseimage, thumbnail, kml = get_file_names(BASED + geoid)
+        baseimage, thumbnail, kml = get_file_names(OPTIONS.BASEDIR + geoid)
 
         # Open tldr.py-generated boundaries file and 
         # create location for new Weofile output.
-        output_weofile, base_feat, geo_feat = mk_weofile(BASED, geoid)
+        output_weofile, base_feat, geo_feat = mk_weofile(OPTIONS.BASEDIR, geoid)
 
         # Create the structure for an Upload Weofile 
-        weo_contents = mk_upload_weo(HOSTN, LICN, geoid, BASED, baseimage, thumbnail,
-                                     TITLE, listing_name, namelsad, base_feat, 
+        weo_contents = mk_upload_weo(OPTIONS.HOSTNAME, OPTIONS.LICENSE, geoid, OPTIONS.BASEDIR, baseimage, thumbnail,
+                                     OPTIONS.NAME, listing_name, namelsad, base_feat, 
                                      geo_feat, smerc_n, smerc_s, smerc_e, smerc_w)
 
         output_weofile.write(weo_contents)
@@ -66,7 +66,7 @@ def feature_to_listing(HOSTN, UNAME, PWORD, TOKN, BASED, SOURC, TITLE, LICN):
         # Call Weoapp on the Upload Weofile that was created
         # Store the token that Weoapp creates for the upload
         call_weoapp = subprocess.Popen(['weoapp', '--continue', '--GUI', '--no-delete', 
-                                        BASED + geoid + '/' + geoid + '-upload.weo'], -1, 
+                                        OPTIONS.BASEDIR + geoid + '/' + geoid + '-upload.weo'], -1, 
                                         None, stdout=subprocess.PIPE)
         weo_out, weo_err = call_weoapp.communicate()
         for aline in weo_out.split('\n'):
@@ -83,6 +83,7 @@ def feature_to_listing(HOSTN, UNAME, PWORD, TOKN, BASED, SOURC, TITLE, LICN):
     return
 
 if __name__ == '__main__':
+    global OPTIONS
     parser = argparse.ArgumentParser(description='Create WeoGeo Listings from features in input vector file')
     parser.add_argument('-H', '--HOSTNAME', required=True, 
                         help='Enter Library URL.')
@@ -100,9 +101,8 @@ if __name__ == '__main__':
                         help='Enter the desired Base Name for the listing.')
     parser.add_argument('-L', '--LICENSE', required=False, default=1, type=int, 
                         help='Enter the integer value of the License ID you want to use.')
-    args = parser.parse_args()
+    OPTIONS = parser.parse_args()
 
-    output_tokens_file = open((args.BASEDIR + 'tokens.csv'), 'w')
+    output_tokens_file = open((OPTIONS.BASEDIR + 'tokens.csv'), 'w')
 
-    feature_to_listing(args.HOSTNAME, args.USERNAME, args.PASSWORD, args.TOKEN, 
-                       args.BASEDIR, args.VECTOR, args.NAME, args.LICENSE)
+    feature_to_listing()
