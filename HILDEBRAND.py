@@ -31,19 +31,21 @@ def reproject_geom(feat, inRef, outRef):
     return n,s,e,w
 
 def mk_tldr_call(n,s,e,w,gid,hostname,username,password,token,based):
-    try:
-        subprocess.check_call(['python', 'tldr.py', 
-                            '--bounding-box', str(n) + ',' + str(s) + ',' + str(e) + ',' + str(w), 
-                            '--hostname',     hostname, 
-                            '--username',     username, 
-                            '--password',     password, 
-                            '--token',        token, 
-                            '--mask',         based + 'raster\\' + gid + '.tif',
-                            '--work-dir',     based + 'temp', 
-                            '--output-file',  based + gid + '\\' + gid], 
-                            shell=True)
-    except:
-        pass
+    c = subprocess.Popen(['python', 'tldr.py', 
+                        '--bounding-box', str(n) + ',' + str(s) + ',' + str(e) + ',' + str(w), 
+                        '--hostname',     hostname, 
+                        '--username',     username, 
+                        '--password',     password, 
+                        '--token',        token, 
+                        '--mask',         based + 'raster\\' + gid + '.tif',
+                        '--work-dir',     based + 'temp', 
+                        '--output-file',  based + gid + '\\' + gid], 
+                        -1, None, stdout=subprocess.PIPE)
+    output, error = c.communicate()
+    print output
+    if c.returncode != 0:
+        print 'Failure in the preview image creation process.'
+        exit(0)
     return
 
 def mk_listing_dir(gid):
