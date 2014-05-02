@@ -45,8 +45,8 @@ def feature_to_listing():
         mk_listing_dir(OPTIONS.BASEDIR + geoid)
 
         # Call TLDR to make the preview image files.
-        mk_tldr_call(north, south, east, west, geoid, 
-                     OPTIONS.HOSTNAME, OPTIONS.USERNAME, OPTIONS.PASSWORD, OPTIONS.TOKEN, OPTIONS.BASEDIR)
+        mk_tldr_call(north, south, east, west, geoid, OPTIONS.HOSTNAME, OPTIONS.USERNAME, 
+                     OPTIONS.PASSWORD, OPTIONS.TOKEN, OPTIONS.BASEDIR)
 
         # Get file names for the Upload Weofile.
         baseimage, thumbnail, kml = get_file_names(OPTIONS.BASEDIR + geoid)
@@ -56,9 +56,9 @@ def feature_to_listing():
         output_weofile, base_feat, geo_feat = mk_weofile(OPTIONS.BASEDIR, geoid)
 
         # Create the structure for an Upload Weofile 
-        weo_contents = mk_upload_weo(OPTIONS.HOSTNAME, OPTIONS.LICENSE, geoid, OPTIONS.BASEDIR, baseimage, thumbnail,
-                                     OPTIONS.NAME, listing_name, namelsad, base_feat, 
-                                     geo_feat, smerc_n, smerc_s, smerc_e, smerc_w)
+        weo_contents = mk_upload_weo(OPTIONS.HOSTNAME, OPTIONS.LICENSE, geoid, OPTIONS.BASEDIR, 
+                                     baseimage, thumbnail, OPTIONS.NAME, listing_name, namelsad, 
+                                     base_feat, geo_feat, smerc_n, smerc_s, smerc_e, smerc_w)
 
         output_weofile.write(weo_contents)
         output_weofile.close()
@@ -69,6 +69,10 @@ def feature_to_listing():
                                         OPTIONS.BASEDIR + geoid + '/' + geoid + '-upload.weo'], -1, 
                                         None, stdout=subprocess.PIPE)
         weo_out, weo_err = call_weoapp.communicate()
+        if call_weoapp.returncode != 0:
+            print 'Upload failed!'
+            exit(0)
+
         for aline in weo_out.split('\n'):
             if ':weoapp-token' in aline:
                 output_tokens_file.write(aline.split(':')[2] + ',' + geoid + '\n')
@@ -84,7 +88,7 @@ def feature_to_listing():
 
 if __name__ == '__main__':
     global OPTIONS
-    parser = argparse.ArgumentParser(description='Create WeoGeo Listings from features in input vector file')
+    parser = argparse.ArgumentParser(description='Create WeoGeo Listings from features in input vector file.')
     parser.add_argument('-H', '--HOSTNAME', required=True, 
                         help='Enter Library URL.')
     parser.add_argument('-U', '--USERNAME', required=True, 
